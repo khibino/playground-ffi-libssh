@@ -12,7 +12,8 @@ gen_hs = \
 
 target = \
 	session \
-	options
+	options \
+	connect
 
 
 all: $(gen_hs) $(target)
