@@ -2,8 +2,9 @@
 module Libssh where
 
 import Foreign (Ptr)
-import Foreign.C (CInt (..), CString, peekCString)
+import Foreign.C (CInt (..), CUInt (..), CUChar (..), CString, peekCString, Errno (..), getErrno)
 
+import String (c'strerror)
 
 #include <libssh/libssh.h>
 
@@ -112,3 +113,82 @@ foreign import ccall unsafe "libssh/libssh.h ssh_disconnect"
 -- socket_t ssh_get_fd(ssh_session session);
 foreign import ccall unsafe "libssh/libssh.h ssh_get_fd"
   c'ssh_get_fd :: SshSession -> IO CInt
+
+data ISshKey
+type SshKey = Ptr ISshKey
+
+-- int ssh_get_server_publickey(ssh_session session, ssh_key *key);
+foreign import ccall unsafe "libssh/libssh.h ssh_get_server_publickey"
+  c'ssh_get_server_publickey :: SshSession -> Ptr SshKey -> IO CInt
+
+
+newtype SshPublickeyHashType = SshPublickeyHashType { codePublickeyHashType :: CInt }
+
+#{enum SshPublickeyHashType, SshPublickeyHashType,
+  SSH_PUBLICKEY_HASH_SHA1,
+  SSH_PUBLICKEY_HASH_MD5,
+  SSH_PUBLICKEY_HASH_SHA256}
+
+type Hash = Ptr CUChar
+
+-- int ssh_get_publickey_hash(const ssh_key key,
+--                            enum ssh_publickey_hash_type type,
+--                            unsigned char **hash,
+--                            size_t *hlen);
+foreign import ccall unsafe "libssh/libssh.h ssh_get_publickey_hash"
+  c'ssh_get_publickey_hash :: SshKey -> SshPublickeyHashType -> Ptr Hash -> Ptr CUInt -> IO CInt
+
+-- void ssh_key_free (ssh_key key);
+foreign import ccall unsafe "libssh/libssh.h ssh_key_free"
+  c'ssh_key_free :: SshKey -> IO ()
+
+
+newtype SshKnownHosts = SshKnownHosts { codeKnownHosts :: CInt } deriving (Eq, Show)
+
+#{enum SshKnownHosts, SshKnownHosts,
+  SSH_KNOWN_HOSTS_ERROR,
+  SSH_KNOWN_HOSTS_NOT_FOUND,
+  SSH_KNOWN_HOSTS_UNKNOWN,
+  SSH_KNOWN_HOSTS_OK,
+  SSH_KNOWN_HOSTS_CHANGED,
+  SSH_KNOWN_HOSTS_OTHER}
+
+-- enum ssh_known_hosts_e ssh_session_is_known_server(ssh_session session);
+foreign import ccall unsafe "libssh/libssh.h ssh_session_is_known_server"
+  c'ssh_session_is_known_server :: SshSession -> IO SshKnownHosts
+
+-- void ssh_clean_pubkey_hash(unsigned char **hash);
+foreign import ccall unsafe "libssh/libssh.h ssh_clean_pubkey_hash"
+  c'ssh_clean_pubkey_hash :: Ptr Hash -> IO ()
+
+-- void ssh_print_hexa(const char *descr, const unsigned char *what, size_t len);
+foreign import ccall unsafe "libssh/libssh.h ssh_print_hexa"
+  c'ssh_print_hexa :: CString -> Hash -> CUInt -> IO ()
+
+-- char *ssh_get_hexa(const unsigned char *what, size_t len);
+foreign import ccall unsafe "libssh/libssh.h ssh_get_hexa"
+  c'ssh_get_hexa :: Hash -> CUInt -> IO CString
+
+-- void ssh_string_free_char(char *s);
+foreign import ccall unsafe "libssh/libssh.h ssh_string_free_char"
+  c'ssh_string_free_char :: CString -> IO ()
+
+sshGetHexA :: Hash -> CUInt -> IO String
+sshGetHexA hash len = do
+  hexa <- c'ssh_get_hexa hash len
+  x <- peekCString hexa
+  c'ssh_string_free_char hexa
+  return x
+
+-- int ssh_session_update_known_hosts(ssh_session session);
+foreign import ccall unsafe "libssh/libssh.h ssh_session_update_known_hosts"
+  c'ssh_session_update_known_hosts :: SshSession -> IO CInt
+
+sshSessionUpdateKnownHosts :: SshSession -> IO (Maybe String)
+sshSessionUpdateKnownHosts session = do
+  rc <- c'ssh_session_update_known_hosts session
+  Errno eno <- getErrno
+
+  if rc < 0
+    then fmap Just $ peekCString =<< c'strerror eno
+    else return Nothing
