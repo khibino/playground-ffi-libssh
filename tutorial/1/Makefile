@@ -7,13 +7,15 @@
 
 
 gen_hs = \
-	Libssh.hs \
+	String.hs \
+	Libssh.hs
 
 
 target = \
 	session \
 	options \
-	connect
+	connect \
+	auth_server
 
 
 all: $(gen_hs) $(target)
