@@ -2,7 +2,7 @@
 module Libssh where
 
 import Foreign (Ptr)
-import Foreign.C (CInt (..))
+import Foreign.C (CInt (..), CString, peekCString)
 
 
 #include <libssh/libssh.h>
@@ -77,6 +77,38 @@ foreign import ccall unsafe "libssh/libssh.h ssh_options_set"
   c'ssh_options_set :: SshSession -> SshOptions -> Ptr a -> IO CInt
 
 
+sshRcOK :: CInt
+sshRcOK = #const SSH_OK
+
+sshRcError :: CInt
+sshRcError = #const SSH_ERROR
+
+sshRcAgain :: CInt
+sshRcAgain = #const SSH_AGAIN
+
+sshRcEOF :: CInt
+sshRcEOF = #const SSH_EOF
+
 -- int ssh_connect(ssh_session session);
+-- for blocking case, `safe` is better?
 foreign import ccall unsafe "libssh/libssh.h ssh_connect"
   c'ssh_connect :: SshSession -> IO CInt
+
+-- const char *ssh_get_error(void *error);
+foreign import ccall unsafe "libssh/libssh.h ssh_get_error"
+  c'ssh_get_error :: Ptr a -> IO CString
+
+sshGetError :: Ptr a -> IO String
+sshGetError p = peekCString =<< c'ssh_get_error p
+
+sshSessionGetError :: SshSession -> IO String
+sshSessionGetError = sshGetError
+
+-- void ssh_disconnect(ssh_session session);
+-- for blocking case, `safe` is better?
+foreign import ccall unsafe "libssh/libssh.h ssh_disconnect"
+  c'ssh_disconnect :: SshSession -> IO ()
+
+-- socket_t ssh_get_fd(ssh_session session);
+foreign import ccall unsafe "libssh/libssh.h ssh_get_fd"
+  c'ssh_get_fd :: SshSession -> IO CInt
