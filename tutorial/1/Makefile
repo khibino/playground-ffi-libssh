@@ -8,6 +8,7 @@
 
 gen_hs = \
 	String.hs \
+	Unistd.hs \
 	Libssh.hs
 
 
