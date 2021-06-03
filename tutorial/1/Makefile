@@ -1,6 +1,6 @@
 
 %: %.hs
-	ghc -lssh -Wall --make $@
+	ghc -lssh -Wall -j -O --make $@
 
 %.hs: %.hsc
 	hsc2hs $^
