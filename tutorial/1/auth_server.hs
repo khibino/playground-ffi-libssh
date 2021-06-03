@@ -98,7 +98,6 @@ verifyKnownhost session = do
               empty
 
     dispatch
-    return ()
 
 main :: IO ()
 main = do
