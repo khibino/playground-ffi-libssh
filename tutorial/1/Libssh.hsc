@@ -184,6 +184,8 @@ sshGetHexA hash len = do
 foreign import ccall unsafe "libssh/libssh.h ssh_session_update_known_hosts"
   c'ssh_session_update_known_hosts :: SshSession -> IO CInt
 
+-- on success, Nothing.
+-- on error, Just error message string.
 sshSessionUpdateKnownHosts :: SshSession -> IO (Maybe String)
 sshSessionUpdateKnownHosts session = do
   rc <- c'ssh_session_update_known_hosts session
