@@ -11,9 +11,9 @@ import Libssh
 
 main :: IO ()
 main = do
-  ses <- c'ssh_new
-  when (ses ==  nullPtr) $ fail "session is nullptr!"
-  print =<< withCString "localhost" (c'ssh_options_set ses sshOptionsHost)
-  print =<< ialloca sshLogProtocol (c'ssh_options_set ses sshOptionsLogVerbosity)
-  print =<< ialloca (22 :: CInt) (c'ssh_options_set ses sshOptionsPort)
-  c'ssh_free ses
+  mySshSession <- c'ssh_new
+  when (mySshSession ==  nullPtr) $ fail "session is nullptr!"
+  print =<< withCString "localhost" (c'ssh_options_set mySshSession sshOptionsHost)
+  print =<< ialloca sshLogProtocol (c'ssh_options_set mySshSession sshOptionsLogVerbosity)
+  print =<< ialloca (22 :: CInt) (c'ssh_options_set mySshSession sshOptionsPort)
+  c'ssh_free mySshSession
