@@ -18,7 +18,9 @@ target = \
 	auth_server
 
 
-all: $(gen_hs) $(target)
+all: gen $(target)
+
+gen: $(gen_hs)
 
 clean:
 	$(RM) $(target)
