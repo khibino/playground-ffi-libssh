@@ -10,13 +10,13 @@ import Libssh
 
 main :: IO ()
 main = do
-  ses <- c'ssh_new
-  when (ses ==  nullPtr) $ fail "session is nullptr!"
-  void $ withCString "localhost" (c'ssh_options_set ses sshOptionsHost)
-  rc <- c'ssh_connect ses
+  mySshSession <- c'ssh_new
+  when (mySshSession ==  nullPtr) $ fail "session is nullptr!"
+  void $ withCString "localhost" (c'ssh_options_set mySshSession sshOptionsHost)
+  rc <- c'ssh_connect mySshSession
   when (rc /= sshRcOK) $ do
-    em <- sshSessionGetError ses
+    em <- sshSessionGetError mySshSession
     fail $ "Error connecting to localhost: " ++ em
-  print =<< c'ssh_get_fd ses
-  c'ssh_disconnect ses
-  c'ssh_free ses
+  print =<< c'ssh_get_fd mySshSession
+  c'ssh_disconnect mySshSession
+  c'ssh_free mySshSession
