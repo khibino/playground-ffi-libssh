@@ -90,6 +90,14 @@ sshRcAgain = #const SSH_AGAIN
 sshRcEOF :: CInt
 sshRcEOF = #const SSH_EOF
 
+-- tricky handling `#define`s with hsc-enum
+#{enum CInt, ,
+  SSH_OK,
+  SSH_ERROR,
+  SSH_AGAIN,
+  SSH_EOF}
+
+
 -- int ssh_connect(ssh_session session);
 -- for blocking case, `safe` is better?
 foreign import ccall unsafe "libssh/libssh.h ssh_connect"
