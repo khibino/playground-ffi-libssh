@@ -194,3 +194,21 @@ sshSessionUpdateKnownHosts session = do
   if rc < 0
     then fmap Just $ peekCString =<< c'strerror eno
     else return Nothing
+
+newtype SshAuth = SshAuth { codeAuth :: CInt } deriving (Eq, Ord)
+
+#{enum SshAuth, SshAuth,
+  SSH_AUTH_SUCCESS,
+  SSH_AUTH_DENIED,
+  SSH_AUTH_PARTIAL,
+  SSH_AUTH_INFO,
+  SSH_AUTH_AGAIN,
+  SSH_AUTH_ERROR}
+
+-- int ssh_userauth_password(ssh_session session,
+--                           const char *username,
+--                           const char *password);
+-- username SHOULD be NULL.
+-- Most server implementations do not permit changing the username.
+foreign import ccall unsafe "libssh/libssh.h ssh_userauth_password"
+  c'ssh_userauth_password :: SshSession -> CString -> CString -> IO SshAuth
