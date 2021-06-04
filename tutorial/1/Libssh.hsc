@@ -212,3 +212,34 @@ newtype SshAuth = SshAuth { codeAuth :: CInt } deriving (Eq, Ord)
 -- Most server implementations do not permit changing the username.
 foreign import ccall unsafe "libssh/libssh.h ssh_userauth_password"
   c'ssh_userauth_password :: SshSession -> CString -> CString -> IO SshAuth
+
+data ISshChannel
+type SshChannel = Ptr ISshChannel
+
+-- ssh_channel ssh_channel_new(ssh_session session);
+foreign import ccall unsafe "libssh/libssh.h ssh_channel_new"
+  c'ssh_channel_new :: SshSession -> IO SshChannel
+
+-- int ssh_channel_close(ssh_channel channel);
+foreign import ccall unsafe "libssh/libssh.h ssh_channel_close"
+  c'ssh_channel_close :: SshChannel -> IO CInt
+
+-- void ssh_channel_free(ssh_channel channel);
+foreign import ccall unsafe "libssh/libssh.h ssh_channel_free"
+  c'ssh_channel_free :: SshChannel -> IO ()
+
+-- int ssh_channel_open_session(ssh_channel channel);
+foreign import ccall unsafe "libssh/libssh.h ssh_channel_open_session"
+  c'ssh_channel_open_session :: SshChannel -> IO CInt
+
+-- int ssh_channel_request_exec(ssh_channel channel, const char *cmd);
+foreign import ccall unsafe "libssh/libssh.h ssh_channel_request_exec"
+  c'ssh_channel_request_exec :: SshChannel -> CString -> IO CInt
+
+-- int ssh_channel_read(ssh_channel channel, void *dest, uint32_t count, int is_stderr);
+foreign import ccall unsafe "libssh/libssh.h ssh_channel_read"
+  c'ssh_channel_read :: SshChannel -> Ptr a -> CUInt -> CInt -> IO CInt
+
+-- int ssh_channel_send_eof(ssh_channel channel);
+foreign import ccall unsafe "libssh/libssh.h ssh_channel_send_eof"
+  c'ssh_channel_send_eof :: SshChannel -> IO CInt
