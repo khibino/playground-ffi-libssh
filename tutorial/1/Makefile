@@ -17,7 +17,8 @@ target = \
 	options \
 	connect \
 	auth_server \
-	auth_user
+	auth_user \
+	do_something
 
 
 all: gen $(target)
