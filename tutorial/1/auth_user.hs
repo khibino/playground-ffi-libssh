@@ -12,7 +12,7 @@ import AuthServer (verifyKnownhost)
 import Unistd (c'getpass)
 import Libssh
   (c'ssh_new, c'ssh_free, c'ssh_options_set, c'ssh_connect, c'ssh_disconnect,
-   sshOptionsHost, sshRcOK, sshSessionGetError,
+   sshOptionsHost, sshOk, sshSessionGetError,
    c'ssh_userauth_password,
    sshAuthSuccess,)
 
@@ -27,7 +27,7 @@ main = do
 
   -- Connect to server
   rc <- c'ssh_connect mySshSession
-  when (rc /= sshRcOK) $ do
+  when (rc /= sshOk) $ do
     hPutStrLn stderr . ("Error connecting to localhost: " ++)
       =<< sshSessionGetError mySshSession
     c'ssh_free mySshSession
