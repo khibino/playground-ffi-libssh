@@ -1,11 +1,4 @@
 
-%: %.hs
-	ghc -lssh -Wall -j -O --make $@
-
-%.hs: %.hsc
-	hsc2hs $^
-
-
 gen_hs = \
 	String.hs \
 	Unistd.hs \
@@ -19,6 +12,13 @@ target = \
 	auth_server \
 	auth_user \
 	do_something
+
+
+%.hs: %.hsc
+	hsc2hs $^
+
+%: %.hs
+	ghc -lssh -Wall -j -O --make $@
 
 
 all: gen $(target)
